@@ -1,0 +1,2465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Board Games</title>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #1a1a2e;
+    color: #e8e8e8;
+    touch-action: manipulation;
+}
+
+.page {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+.page.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.bg-pattern {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.03;
+    background-image:
+    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.3) 1px, transparent 1px),
+    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.3) 1px, transparent 1px);
+    background-size: 60px 60px;
+}
+
+.content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 6px;
+    font-weight: 300;
+    letter-spacing: 3px;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.subtitle {
+    text-align: center;
+    color: #777;
+    margin-bottom: 30px;
+    font-size: 0.85em;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    margin: 8px auto;
+    padding: 16px 24px;
+    border: 1px solid #333;
+    border-radius: 14px;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+    color: #fff;
+    background: #1e1e2e;
+    position: relative;
+    overflow: hidden;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.btn:hover {
+    background: #252540;
+    border-color: #444;
+    transform: translateY(-1px);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-primary {
+    background: #fff;
+    color: #1a1a2e;
+    border-color: #fff;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background: #e0e0e0;
+    border-color: #e0e0e0;
+}
+
+.btn-success {
+    background: #1e1e2e;
+    color: #4ade80;
+    border-color: #4ade80;
+}
+
+.btn-success:hover {
+    background: #4ade80;
+    color: #1a1a2e;
+}
+
+.btn-warning {
+    background: #1e1e2e;
+    color: #fbbf24;
+    border-color: #fbbf24;
+}
+
+.btn-warning:hover {
+    background: #fbbf24;
+    color: #1a1a2e;
+}
+
+.btn-info {
+    background: #1e1e2e;
+    color: #60a5fa;
+    border-color: #60a5fa;
+}
+
+.btn-info:hover {
+    background: #60a5fa;
+    color: #1a1a2e;
+}
+
+.btn-danger {
+    background: #1e1e2e;
+    color: #ef4444;
+    border-color: #ef4444;
+}
+
+.btn-danger:hover {
+    background: #ef4444;
+    color: #1a1a2e;
+}
+
+.btn-small {
+    padding: 12px 20px;
+    font-size: 0.9em;
+    max-width: 220px;
+    margin: 6px auto;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.game-card {
+    background: #1a1a2e;
+    border-radius: 16px;
+    padding: 20px;
+    margin: 10px auto;
+    max-width: 300px;
+    border: 1px solid #2a2a4a;
+    cursor: pointer;
+    transition: all 0.25s;
+    width: 100%;
+    text-align: left;
+}
+
+.game-card:hover {
+    border-color: #444;
+    background: #1e1e35;
+    transform: translateY(-2px);
+}
+
+.game-card:active {
+    transform: scale(0.98);
+}
+
+.game-card h3 {
+    color: #fff;
+    margin-bottom: 6px;
+    font-size: 1.15em;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
+
+.game-card p {
+    color: #888;
+    font-size: 0.82em;
+    line-height: 1.5;
+}
+
+.game-card.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.game-card .game-card-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7em;
+    margin-top: 8px;
+    background: #2a2a4a;
+    color: #888;
+}
+
+.back-btn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    padding: 10px 16px;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #aaa;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 0.85em;
+    transition: all 0.2s;
+}
+
+.back-btn:hover {
+    background: #252540;
+    color: #fff;
+}
+
+/* Connect 4 */
+.connect4-board {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+    max-width: 340px;
+    margin: 15px auto;
+    background: #0f172a;
+    padding: 8px;
+    border-radius: 12px;
+    border: 1px solid #1e3a5f;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.connect4-cell {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #1a1a2e;
+    cursor: pointer;
+    border: 2px solid #2a2a4a;
+    transition: all 0.2s;
+}
+
+.connect4-cell.p1 {
+    background: #ef4444;
+    box-shadow: 0 0 12px rgba(239,68,68,0.4);
+    border-color: #ef4444;
+}
+
+.connect4-cell.p2 {
+    background: #fbbf24;
+    box-shadow: 0 0 12px rgba(251,191,36,0.4);
+    border-color: #fbbf24;
+}
+
+.connect4-cell.p3 {
+    background: #4ade80;
+    box-shadow: 0 0 12px rgba(74,222,128,0.4);
+    border-color: #4ade80;
+}
+
+.connect4-cell.p4 {
+    background: #f97316;
+    box-shadow: 0 0 12px rgba(249,115,22,0.4);
+    border-color: #f97316;
+}
+
+.connect4-cell.winner {
+    animation: winnerPulse 1.2s infinite;
+    border-color: #fff;
+}
+
+@keyframes winnerPulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+    50% { transform: scale(1.1); box-shadow: 0 0 25px rgba(255,255,255,0.5); }
+}
+
+/* TTT */
+.ttt-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    max-width: 280px;
+    margin: 15px auto;
+}
+
+.ttt-cell {
+    width: 90px;
+    height: 90px;
+    background: #1a1a2e;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2em;
+    font-weight: bold;
+    cursor: pointer;
+    border: 1px solid #2a2a4a;
+    transition: all 0.2s;
+    color: #fff;
+}
+
+.ttt-cell:hover {
+    border-color: #444;
+    background: #1e1e35;
+}
+
+.ttt-cell.x { color: #ef4444; }
+.ttt-cell.o { color: #60a5fa; }
+
+.ttt-cell.winner {
+    background: #252540 !important;
+    border-color: #fbbf24 !important;
+    box-shadow: 0 0 20px rgba(251,191,36,0.2);
+    animation: winnerPulse 1.2s infinite;
+}
+
+.ttt-cell.selected {
+    background: #333 !important;
+}
+
+/* Dots & Boxes */
+.dots-boxes-container {
+    max-width: 420px;
+    margin: 15px auto;
+}
+
+.dots-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    background: #555;
+    border-radius: 50%;
+    margin: 3px;
+}
+
+.h-line {
+    width: 44px;
+    height: 5px;
+    margin: 0 2px;
+    background: #2a2a4a;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.h-line:hover { background: #444; }
+.h-line.p1 { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+.h-line.p2 { background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,0.4); }
+
+.v-line {
+    width: 5px;
+    height: 44px;
+    margin: 2px 3px;
+    background: #2a2a4a;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.v-line:hover { background: #444; }
+.v-line.p1 { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.4); }
+.v-line.p2 { background: #fbbf24; box-shadow: 0 0 8px rgba(251,191,36,0.4); }
+
+.box {
+    width: 44px;
+    height: 44px;
+    margin: 2px;
+    border-radius: 3px;
+    background: #0f0f1a;
+    border: 1px solid #1a1a2e;
+}
+
+.box.p1 {
+    background: rgba(239,68,68,0.12);
+    border-color: #ef4444;
+}
+
+.box.p2 {
+    background: rgba(251,191,36,0.12);
+    border-color: #fbbf24;
+}
+
+/* UI Elements */
+.turn-indicator {
+    text-align: center;
+    font-size: 1.05em;
+    margin: 12px 0;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    max-width: 340px;
+    width: 100%;
+}
+
+.score-board {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+    max-width: 340px;
+    width: 100%;
+}
+
+.score-item {
+    padding: 10px 18px;
+    border-radius: 10px;
+    background: #1a1a2e;
+    border: 1px solid #2a2a4a;
+    text-align: center;
+    min-width: 80px;
+    flex: 1;
+}
+
+.score-item .name {
+    font-size: 0.7em;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.score-item .score {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: #fff;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #1a1a2e;
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 300px;
+    width: 90%;
+    border: 1px solid #333;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+.modal-content h2 {
+    margin-bottom: 12px;
+    color: #fff;
+    font-size: 1.5em;
+    font-weight: 300;
+    letter-spacing: 1px;
+}
+
+.modal-content p {
+    color: #888;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+.rematch-area {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #2a2a4a;
+    display: none;
+    text-align: center;
+    width: 100%;
+    max-width: 340px;
+}
+
+.rematch-area.show {
+    display: block;
+}
+
+.how-to-play {
+    background: #1a1a2e;
+    border-radius: 14px;
+    padding: 16px;
+    margin: 12px auto;
+    max-width: 320px;
+    border: 1px solid #2a2a4a;
+    width: 100%;
+    text-align: left;
+}
+
+.how-to-play h4 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-weight: 500;
+    font-size: 0.95em;
+    letter-spacing: 1px;
+}
+
+.how-to-play ul {
+    color: #888;
+    padding-left: 18px;
+    font-size: 0.82em;
+    line-height: 1.7;
+}
+
+.mode-selector {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin: 12px 0;
+    max-width: 340px;
+    width: 100%;
+}
+
+.mode-btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex: 1;
+}
+
+.mode-btn.active {
+    border-color: #fff;
+    color: #fff;
+    background: #252540;
+}
+
+.room-code {
+    text-align: center;
+    font-size: 1.5em;
+    font-weight: 600;
+    color: #fff;
+    margin: 12px 0;
+    letter-spacing: 3px;
+    font-family: monospace;
+    background: #1a1a2e;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #333;
+    max-width: 300px;
+    width: 100%;
+    word-break: break-all;
+}
+
+.players-list {
+    max-width: 300px;
+    margin: 12px auto;
+    width: 100%;
+}
+
+.player-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin: 6px 0;
+    background: #1a1a2e;
+    border-radius: 10px;
+    border: 1px solid #2a2a4a;
+}
+
+.player-color {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-right: 12px;
+    box-shadow: 0 0 8px currentColor;
+}
+
+.player-name {
+    flex: 1;
+    font-size: 0.9em;
+    color: #fff;
+}
+
+.input-code, .input-name, .peer-input {
+    width: 100%;
+    max-width: 280px;
+    margin: 10px auto;
+    display: block;
+    padding: 14px;
+    font-size: 1em;
+    text-align: center;
+    border-radius: 10px;
+    border: 1px solid #333;
+    background: #1a1a2e;
+    color: #fff;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-code:focus, .input-name:focus, .peer-input:focus {
+    border-color: #666;
+}
+
+.input-code {
+    font-family: monospace;
+    letter-spacing: 6px;
+    font-size: 1.2em;
+}
+
+.stats-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 10px auto;
+    max-width: 300px;
+    border: 1px solid #2a2a4a;
+    width: 100%;
+}
+
+.stats-card h4 {
+    color: #fff;
+    margin-bottom: 12px;
+    font-size: 0.85em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 500;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #252540;
+    font-size: 0.82em;
+}
+
+.stats-row:last-child {
+    border-bottom: none;
+}
+
+.stats-label {
+    color: #666;
+}
+
+.stats-value {
+    color: #fff;
+    font-weight: 600;
+}
+
+/* CHANGED: Enhanced connection status */
+.connection-status {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75em;
+    font-weight: 600;
+    z-index: 1000;
+    background: #1a1a2e;
+    border: 1px solid #333;
+    transition: all 0.3s;
+}
+
+.status-online { color: #4ade80; border-color: #4ade80; }
+.status-offline { color: #ef4444; border-color: #ef4444; }
+.status-hosting { color: #fbbf24; border-color: #fbbf24; }
+.status-connecting { color: #60a5fa; border-color: #60a5fa; animation: pulse 1.5s infinite; }
+.status-reconnecting { color: #f97316; border-color: #f97316; animation: pulse 1.5s infinite; }
+.status-error { color: #ef4444; border-color: #ef4444; background: rgba(239,68,68,0.1); }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* NEW: Status text for lobby pages */
+.status-text {
+    text-align: center;
+    color: #888;
+    font-size: 0.9em;
+    margin: 8px 0;
+    min-height: 1.2em;
+    transition: all 0.3s;
+}
+
+.status-text.error { color: #ef4444; }
+.status-text.success { color: #4ade80; }
+.status-text.info { color: #60a5fa; }
+
+/* NEW: Reconnection banner */
+.reconnect-banner {
+    display: none;
+    position: fixed;
+    top: 50px;
+    left: 0;
+    right: 0;
+    background: rgba(249, 115, 22, 0.15);
+    border: 1px solid #f97316;
+    color: #f97316;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.85em;
+    z-index: 999;
+    animation: slideDown 0.3s ease;
+}
+
+.reconnect-banner.active {
+    display: block;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-100%); }
+    to { transform: translateY(0); }
+}
+
+/* NEW: Game selection page */
+.game-selection-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 320px;
+    margin: 15px auto;
+}
+
+.selection-label {
+    color: #888;
+    font-size: 0.85em;
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.selection-label.host {
+    color: #4ade80;
+}
+
+.selection-label.guest {
+    color: #60a5fa;
+}
+
+.chat-box {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #0f0f1a;
+    border-top: 1px solid #2a2a4a;
+    padding: 10px;
+    max-height: 200px;
+    display: none;
+    z-index: 500;
+}
+
+.chat-box.active {
+    display: block;
+}
+
+.chat-messages {
+    max-height: 130px;
+    overflow-y: auto;
+    font-size: 0.82em;
+    margin-bottom: 8px;
+    padding: 4px;
+}
+
+.chat-msg {
+    padding: 4px 0;
+    color: #888;
+}
+
+.chat-msg strong {
+    color: #fff;
+    font-weight: 500;
+}
+
+.chat-msg.system {
+    color: #666;
+    font-style: italic;
+}
+
+.chat-msg.error {
+    color: #ef4444;
+}
+
+.chat-input {
+    display: flex;
+    gap: 8px;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1a1a2e;
+    color: #fff;
+    outline: none;
+    font-size: 0.85em;
+}
+
+.chat-input button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: #333;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all 0.2s;
+}
+
+.chat-input button:hover {
+    background: #444;
+}
+
+.section-title {
+    text-align: center;
+    color: #888;
+    margin: 15px 0 10px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 0.75em;
+}
+
+.divider {
+    width: 40px;
+    height: 1px;
+    background: #333;
+    margin: 20px auto;
+}
+
+/* NEW: Copy button for room code */
+.copy-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    background: #1a1a2e;
+    color: #888;
+    cursor: pointer;
+    font-size: 0.8em;
+    margin-top: 8px;
+    transition: all 0.2s;
+}
+
+.copy-btn:hover {
+    border-color: #4ade80;
+    color: #4ade80;
+}
+
+.copy-btn.copied {
+    border-color: #4ade80;
+    color: #4ade80;
+}
+
+@media(max-width: 400px) {
+    .connect4-cell { width: 36px; height: 36px; }
+    .ttt-cell { width: 75px; height: 75px; font-size: 1.8em; }
+    .h-line { width: 36px; }
+    .v-line { height: 36px; }
+    .box { width: 36px; height: 36px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+
+<!-- Connection Status Indicator -->
+<div class="connection-status status-offline" id="connStatus">Offline</div>
+
+<!-- Reconnection Banner -->
+<div class="reconnect-banner" id="reconnectBanner">
+Connection lost. Reconnecting...
+</div>
+
+<!-- MAIN MENU -->
+<div class="page active" id="mainMenu">
+<div class="content">
+<h1>Board Games</h1>
+<p class="subtitle">Multiplayer Board Games</p>
+<div class="divider"></div>
+<button class="btn btn-primary" onclick="navigateTo('profileMenu')">Profile & Stats</button>
+<button class="btn btn-success" onclick="navigateTo('hostJoin')">Play Online</button>
+<button class="btn btn-success" onclick="navigateTo('localMenu')">Play on This Device</button>
+<button class="btn btn-info" onclick="navigateTo('howToPlay')">How to Play</button>
+</div>
+</div>
+
+<!-- PROFILE -->
+<div class="page" id="profileMenu">
+<button class="back-btn" onclick="navigateTo('mainMenu')">Back</button>
+<div class="content">
+<h1>Profile</h1>
+<p class="subtitle">Your Identity</p>
+<div class="divider"></div>
+<input type="text" class="input-name" id="playerNameInput" placeholder="Enter your name" maxlength="15">
+<button class="btn btn-primary" onclick="saveProfile()">Save Name</button>
+<div class="stats-card">
+<h4>Statistics</h4>
+<div class="stats-row"><span class="stats-label">Connect 4 Wins</span><span class="stats-value" id="statC4Wins">0</span></div>
+<div class="stats-row"><span class="stats-label">Connect 4 Losses</span><span class="stats-value" id="statC4Losses">0</span></div>
+<div class="stats-row"><span class="stats-label">TTT Wins</span><span class="stats-value" id="statTTTWins">0</span></div>
+<div class="stats-row"><span class="stats-label">TTT Losses</span><span class="stats-value" id="statTTTLosses">0</span></div>
+<div class="stats-row"><span class="stats-label">Dots &amp; Boxes Wins</span><span class="stats-value" id="statDBWins">0</span></div>
+<div class="stats-row"><span class="stats-label">Dots &amp; Boxes Losses</span><span class="stats-value" id="statDBLosses">0</span></div>
+<div class="stats-row"><span class="stats-label">Current Streak</span><span class="stats-value" id="statStreak">0</span></div>
+<div class="stats-row"><span class="stats-label">Best Streak</span><span class="stats-value" id="statBestStreak">0</span></div>
+</div>
+<button class="btn btn-danger" onclick="clearStats()">Reset All Stats</button>
+</div>
+</div>
+
+<!-- HOW TO PLAY -->
+<div class="page" id="howToPlay">
+<button class="back-btn" onclick="navigateTo('mainMenu')">Back</button>
+<div class="content">
+<h1>How to Play</h1>
+<p class="subtitle">Game Rules</p>
+<div class="divider"></div>
+<div class="how-to-play">
+<h4>Connect 4</h4>
+<ul><li>Tap any column to drop your piece</li><li>First to connect 4 in a row wins</li><li>Winning pieces glow gold</li></ul>
+</div>
+<div class="how-to-play">
+<h4>Strategic Tic-Tac-Toe</h4>
+<ul><li>Each player only has 3 pieces</li><li>After placing all 3, tap your piece then tap empty spot to move</li><li>Winning 3 glow gold</li></ul>
+</div>
+<div class="how-to-play">
+<h4>Dots &amp; Boxes</h4>
+<ul><li>Tap between dots to draw a line</li><li>Complete a box to claim it and get extra turn</li><li>Most boxes wins</li></ul>
+</div>
+<div class="how-to-play">
+<h4>Online Play</h4>
+<ul><li>Host creates a room and shares the 6-digit code</li><li>Friend enters the room code to join</li><li>Host selects the game after both players connect</li><li>Game starts automatically for both players</li></ul>
+</div>
+</div>
+</div>
+
+<!-- HOST / JOIN -->
+<div class="page" id="hostJoin">
+<button class="back-btn" onclick="navigateTo('mainMenu')">Back</button>
+<div class="content">
+<h1>Online Play</h1>
+<p class="subtitle">Connect with Friends</p>
+<div class="divider"></div>
+<button class="btn btn-success" onclick="initHost()">Host a Game</button>
+<button class="btn btn-primary" onclick="navigateTo('joinGame')">Join a Game</button>
+</div>
+</div>
+
+<!-- JOIN GAME -->
+<div class="page" id="joinGame">
+<button class="back-btn" onclick="navigateTo('hostJoin')">Back</button>
+<div class="content">
+<h1>Join Game</h1>
+<p class="subtitle">Enter 6-Digit Room Code</p>
+<div class="divider"></div>
+<input type="text" class="input-code" id="roomCodeInput" placeholder="ABC123" maxlength="6">
+<div class="status-text" id="joinStatusText"></div>
+<button class="btn btn-success" id="joinBtn" onclick="joinMultiplayerGame()">Join Room</button>
+</div>
+</div>
+
+<!-- HOST LOBBY -->
+<div class="page" id="hostLobby">
+<button class="back-btn" onclick="disconnectMultiplayer()">Leave</button>
+<div class="content">
+<h1>Host Room</h1>
+<p class="subtitle">Share this code with your friend</p>
+<div class="divider"></div>
+<div class="room-code" id="hostRoomCode">---</div>
+<button class="copy-btn" id="copyCodeBtn" onclick="copyRoomCode()">Copy Code</button>
+<div class="status-text info" id="hostStatusText">Creating room...</div>
+<div class="players-list" id="hostPlayers"></div>
+</div>
+</div>
+
+<!-- PEER LOBBY (Guest waiting) -->
+<div class="page" id="peerLobby">
+<button class="back-btn" onclick="disconnectMultiplayer()">Leave</button>
+<div class="content">
+<h1>Connected</h1>
+<p class="subtitle">Joined room successfully</p>
+<div class="divider"></div>
+<div class="status-text info" id="peerStatusText">Joining room...</div>
+<div class="players-list" id="peerPlayers"></div>
+</div>
+</div>
+
+<!-- NEW: GAME SELECTION PAGE (shown to both after connection) -->
+<div class="page" id="gameSelection">
+<button class="back-btn" onclick="disconnectMultiplayer()">Leave</button>
+<div class="content">
+<h1>Select Game</h1>
+<p class="subtitle" id="selectionSubtitle">Waiting for host...</p>
+<div class="divider"></div>
+<div class="status-text" id="selectionStatus">Both players connected!</div>
+
+<div class="game-selection-grid" id="gameSelectionGrid">
+<!-- Host sees clickable cards, guest sees disabled cards -->
+<div class="game-card" id="selectC4" onclick="selectGame('connect4')">
+<h3>Connect 4</h3>
+<p>Drop pieces to connect four in a row</p>
+<span class="game-card-tag">Classic</span>
+</div>
+<div class="game-card" id="selectTTT" onclick="selectGame('tictactoe')">
+<h3>Strategic Tic-Tac-Toe</h3>
+<p>3 pieces each, then move strategically</p>
+<span class="game-card-tag">Strategic</span>
+</div>
+<div class="game-card" id="selectDB" onclick="selectGame('dotsboxes')">
+<h3>Dots &amp; Boxes</h3>
+<p>Draw lines, complete boxes, score points</p>
+<span class="game-card-tag">Classic</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- LOCAL MENU -->
+<div class="page" id="localMenu">
+<button class="back-btn" onclick="navigateTo('mainMenu')">Back</button>
+<div class="content">
+<h1>Local Play</h1>
+<p class="subtitle">Pass phone between players</p>
+<div class="divider"></div>
+<div class="game-card" onclick="startLocalGame('connect4')"><h3>Connect 4</h3><p>2 players on this device</p></div>
+<div class="game-card" onclick="startLocalGame('tictactoe')"><h3>Strategic Tic-Tac-Toe</h3><p>Pass and play</p></div>
+<div class="game-card" onclick="startLocalGame('dotsboxes')"><h3>Dots &amp; Boxes</h3><p>Classic pencil game</p></div>
+</div>
+</div>
+
+<!-- CONNECT 4 GAME -->
+<div class="page" id="connect4Game">
+<button class="back-btn" onclick="leaveGame()">Back</button>
+<div class="content">
+<h1>Connect 4</h1>
+<div class="mode-selector" id="c4ModeSelector">
+<button class="mode-btn active" id="c4mode1" onclick="setC4Mode('1v1')">1 vs 1</button>
+<button class="mode-btn" id="c4mode2" onclick="setC4Mode('2v2')">2 vs 2</button>
+</div>
+<div class="turn-indicator" id="c4turn">Red's Turn</div>
+<div class="score-board">
+<div class="score-item"><div class="name" id="c4name1">Red</div><div class="score" id="c4s1">0</div></div>
+<div class="score-item"><div class="name" id="c4name2">Yellow</div><div class="score" id="c4s2">0</div></div>
+</div>
+<div class="connect4-board" id="c4board"></div>
+<div class="rematch-area" id="c4rematch">
+<button class="btn btn-warning btn-small" onclick="resetC4()">Rematch</button>
+<button class="btn btn-info btn-small" onclick="goMainMenu()">Main Menu</button>
+</div>
+</div>
+</div>
+
+<!-- TIC TAC TOE GAME -->
+<div class="page" id="tictactoeGame">
+<button class="back-btn" onclick="leaveGame()">Back</button>
+<div class="content">
+<h1>Strategic TTT</h1>
+<div class="turn-indicator" id="tttturn">X - Place piece</div>
+<div class="score-board">
+<div class="score-item"><div class="name" id="tttname1">X</div><div class="score" id="tttsx">0</div></div>
+<div class="score-item"><div class="name" id="tttname2">O</div><div class="score" id="tttso">0</div></div>
+</div>
+<div class="ttt-board" id="tttboard"></div>
+<div class="how-to-play" style="margin-top:12px">
+<h4>Phase: <span id="tttphase">Place</span></h4>
+<ul><li>Place 3 pieces each</li><li>Then tap your piece, then destination</li><li>Only adjacent moves</li></ul>
+</div>
+<div class="rematch-area" id="tttrematch">
+<button class="btn btn-warning btn-small" onclick="resetTTT()">Rematch</button>
+<button class="btn btn-info btn-small" onclick="goMainMenu()">Main Menu</button>
+</div>
+</div>
+</div>
+
+<!-- DOTS & BOXES GAME -->
+<div class="page" id="dotsboxesGame">
+<button class="back-btn" onclick="leaveGame()">Back</button>
+<div class="content">
+<h1>Dots &amp; Boxes</h1>
+<div class="turn-indicator" id="dbturn">Player 1's Turn</div>
+<div class="score-board">
+<div class="score-item"><div class="name" id="dbname1">P1</div><div class="score" id="dbs1">0</div></div>
+<div class="score-item"><div class="name" id="dbname2">P2</div><div class="score" id="dbs2">0</div></div>
+</div>
+<div class="dots-boxes-container" id="dbboard"></div>
+<div class="rematch-area" id="dbrematch">
+<button class="btn btn-warning btn-small" onclick="resetDB()">Rematch</button>
+<button class="btn btn-info btn-small" onclick="goMainMenu()">Main Menu</button>
+</div>
+</div>
+</div>
+
+<!-- WIN MODAL -->
+<div class="modal" id="winModal">
+<div class="modal-content">
+<h2 id="winTitle">Winner!</h2>
+<p id="winSub"></p>
+<button class="btn btn-primary" onclick="hideWin()">Continue</button>
+</div>
+</div>
+
+<!-- CHAT -->
+<div class="chat-box" id="chatBox">
+<div class="chat-messages" id="chatMessages"></div>
+<div class="chat-input">
+<input type="text" id="chatInput" placeholder="Type message..." onkeypress="if(event.key==='Enter')sendChat()">
+<button onclick="sendChat()">Send</button>
+</div>
+</div>
+
+<!-- Multiplayer engine -->
+<script src="multiplayer.js"></script>
+
+<script>
+// ==================== NAVIGATION ====================
+function navigateTo(pageId) {
+    var pages = document.querySelectorAll('.page');
+    for (var i = 0; i < pages.length; i++) {
+        pages[i].classList.remove('active');
+    }
+    document.getElementById(pageId).classList.add('active');
+}
+
+function showWin(title, sub) {
+    document.getElementById('winTitle').textContent = title;
+    document.getElementById('winSub').textContent = sub;
+    document.getElementById('winModal').classList.add('active');
+}
+
+function hideWin() {
+    document.getElementById('winModal').classList.remove('active');
+}
+
+function goMainMenu() {
+    navigateTo('mainMenu');
+}
+
+function leaveGame() {
+    if (isMultiplayerGame) {
+        disconnectMultiplayer();
+    } else {
+        navigateTo('localMenu');
+    }
+}
+
+// ==================== PROFILE & STATS ====================
+var playerName = 'Player';
+var stats = {
+    c4Wins: 0, c4Losses: 0,
+    tttWins: 0, tttLosses: 0,
+    dbWins: 0, dbLosses: 0,
+    streak: 0, bestStreak: 0
+};
+
+function loadProfile() {
+    var n = localStorage.getItem('bg_playerName');
+    if (n) playerName = n;
+    var s = localStorage.getItem('bg_stats');
+    if (s) stats = JSON.parse(s);
+    updateStatsDisplay();
+    document.getElementById('playerNameInput').value = playerName;
+}
+
+function saveProfile() {
+    var n = document.getElementById('playerNameInput').value.trim();
+    if (n) {
+        playerName = n;
+        localStorage.setItem('bg_playerName', n);
+        showWin('Saved!', 'Your name is now ' + n);
+    } else {
+        showWin('Error', 'Please enter a name');
+    }
+}
+
+function saveStats() {
+    localStorage.setItem('bg_stats', JSON.stringify(stats));
+    updateStatsDisplay();
+}
+
+function updateStatsDisplay() {
+    document.getElementById('statC4Wins').textContent = stats.c4Wins;
+    document.getElementById('statC4Losses').textContent = stats.c4Losses;
+    document.getElementById('statTTTWins').textContent = stats.tttWins;
+    document.getElementById('statTTTLosses').textContent = stats.tttLosses;
+    document.getElementById('statDBWins').textContent = stats.dbWins;
+    document.getElementById('statDBLosses').textContent = stats.dbLosses;
+    document.getElementById('statStreak').textContent = stats.streak;
+    document.getElementById('statBestStreak').textContent = stats.bestStreak;
+}
+
+function recordWin(game) {
+    stats.streak = stats.streak + 1;
+    if (stats.streak > stats.bestStreak) stats.bestStreak = stats.streak;
+    if (game === 'connect4') stats.c4Wins = stats.c4Wins + 1;
+    if (game === 'tictactoe') stats.tttWins = stats.tttWins + 1;
+    if (game === 'dotsboxes') stats.dbWins = stats.dbWins + 1;
+    saveStats();
+}
+
+function recordLoss(game) {
+    stats.streak = 0;
+    if (game === 'connect4') stats.c4Losses = stats.c4Losses + 1;
+    if (game === 'tictactoe') stats.tttLosses = stats.tttLosses + 1;
+    if (game === 'dotsboxes') stats.dbLosses = stats.dbLosses + 1;
+    saveStats();
+}
+
+function clearStats() {
+    if (confirm('Reset all stats?')) {
+        stats = {
+            c4Wins: 0, c4Losses: 0,
+            tttWins: 0, tttLosses: 0,
+            dbWins: 0, dbLosses: 0,
+            streak: 0, bestStreak: 0
+        };
+        localStorage.removeItem('bg_stats');
+        updateStatsDisplay();
+    }
+}
+
+// ==================== MULTIPLAYER STATE ====================
+var isMultiplayerGame = false;
+var isHost = false;
+var currentGame = '';
+var peerPlayers = [];
+var selectedGame = null;
+
+// ==================== CONNECTION STATUS ====================
+function updateConnStatus(status) {
+    var el = document.getElementById('connStatus');
+    el.className = 'connection-status';
+
+    switch(status) {
+        case 'connected':
+        case 'online':
+            el.classList.add('status-online');
+            el.textContent = 'Online';
+            document.getElementById('reconnectBanner').classList.remove('active');
+            break;
+        case 'hosting':
+            el.classList.add('status-hosting');
+            el.textContent = 'Hosting';
+            document.getElementById('reconnectBanner').classList.remove('active');
+            break;
+        case 'connecting':
+            el.classList.add('status-connecting');
+            el.textContent = 'Connecting...';
+            break;
+        case 'reconnecting':
+            el.classList.add('status-reconnecting');
+            el.textContent = 'Reconnecting...';
+            document.getElementById('reconnectBanner').classList.add('active');
+            break;
+        case 'error':
+        case 'failed':
+            el.classList.add('status-error');
+            el.textContent = 'Error';
+            document.getElementById('reconnectBanner').classList.remove('active');
+            break;
+        default:
+            el.classList.add('status-offline');
+            el.textContent = 'Offline';
+            document.getElementById('reconnectBanner').classList.remove('active');
+    }
+}
+
+// ==================== HOST FLOW ====================
+function initHost() {
+    // CHANGED: Removed "Please select a game first" check
+    // No game selection needed before hosting
+
+    document.getElementById('hostStatusText').textContent = 'Connecting to server...';
+    document.getElementById('hostStatusText').className = 'status-text info';
+    document.getElementById('hostRoomCode').textContent = '---';
+    document.getElementById('hostPlayers').innerHTML = '';
+
+    navigateTo('hostLobby');
+    updateConnStatus('connecting');
+
+    // Set up event handlers
+    MultiplayerEngine.onRoomCreated(function(data) {
+        document.getElementById('hostRoomCode').textContent = data.roomCode;
+        document.getElementById('hostStatusText').textContent = 'Room created! Share this code:';
+        document.getElementById('hostStatusText').className = 'status-text success';
+        updateConnStatus('hosting');
+
+        peerPlayers = [{id: data.playerId, name: playerName, color: '#ef4444', number: 1}];
+        updateHostPlayers();
+
+        addChatMsg('System', 'Room created! Waiting for opponent...');
+    });
+
+    MultiplayerEngine.onOpponentJoined(function(data) {
+        peerPlayers.push({id: 'guest', name: data.playerName || 'Guest', color: '#fbbf24', number: 2});
+        updateHostPlayers();
+        document.getElementById('hostStatusText').textContent = data.playerName + ' joined!';
+        document.getElementById('hostStatusText').className = 'status-text success';
+        addChatMsg('System', data.playerName + ' joined the room.');
+
+        // CHANGED: Show game selection to BOTH players after connection
+        showGameSelection(true);
+    });
+
+    MultiplayerEngine.onShowGameSelection(function(data) {
+        // This is broadcast to both - host already shows it via onOpponentJoined
+        // Guest will receive this and show selection screen
+        if (!isHost) {
+            showGameSelection(false);
+        }
+    });
+
+    MultiplayerEngine.onGameStart(function(data) {
+        startMultiplayerGame(data.gameType, isHost);
+    });
+
+    MultiplayerEngine.onError(function(error) {
+        document.getElementById('hostStatusText').textContent = 'Error: ' + error;
+        document.getElementById('hostStatusText').className = 'status-text error';
+        addChatMsg('Error', error);
+    });
+
+    MultiplayerEngine.onOpponentDisconnected(function(data) {
+        addChatMsg('System', 'Opponent disconnected. Waiting...');
+        document.getElementById('hostStatusText').textContent = 'Opponent disconnected...';
+        document.getElementById('hostStatusText').className = 'status-text error';
+    });
+
+    MultiplayerEngine.onOpponentReconnected(function(data) {
+        addChatMsg('System', 'Opponent reconnected!');
+        document.getElementById('hostStatusText').textContent = 'Opponent reconnected!';
+        document.getElementById('hostStatusText').className = 'status-text success';
+    });
+
+    MultiplayerEngine.onOpponentLeft(function(data) {
+        alert(data.message);
+        disconnectMultiplayer();
+    });
+
+    MultiplayerEngine.onReconnected(function(data) {
+        addChatMsg('System', 'Reconnected!');
+        document.getElementById('hostStatusText').textContent = 'Reconnected!';
+        document.getElementById('hostStatusText').className = 'status-text success';
+
+        // If game was in progress, restore state
+        if (data.gameType && data.status === 'playing') {
+            restoreGameState(data);
+        }
+    });
+
+    MultiplayerEngine.onConnectionStatus(function(status) {
+        updateConnStatus(status);
+    });
+
+    // CHANGED: Create room WITHOUT game type
+    isHost = true;
+    MultiplayerEngine.createRoom(playerName);
+}
+
+// ==================== JOIN FLOW ====================
+function joinMultiplayerGame() {
+    var code = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+    var statusEl = document.getElementById('joinStatusText');
+    var btn = document.getElementById('joinBtn');
+
+    if (!code || code.length !== 6) {
+        statusEl.textContent = 'Please enter a valid 6-character room code';
+        statusEl.className = 'status-text error';
+        return;
+    }
+
+    statusEl.textContent = 'Connecting to server...';
+    statusEl.className = 'status-text info';
+    btn.disabled = true;
+
+    navigateTo('peerLobby');
+    updateConnStatus('connecting');
+
+    MultiplayerEngine.onJoinedRoom(function(data) {
+        document.getElementById('peerStatusText').textContent = 'Joined! Waiting for host to select game...';
+        document.getElementById('peerStatusText').className = 'status-text info';
+        updateConnStatus('online');
+
+        peerPlayers = [
+            {id: 'host', name: 'Host', color: '#ef4444', number: 1},
+            {id: data.playerId, name: playerName, color: '#fbbf24', number: 2}
+        ];
+        updatePeerPlayers();
+        addChatMsg('System', 'Joined room! Waiting for host to select a game...');
+    });
+
+    MultiplayerEngine.onShowGameSelection(function(data) {
+        showGameSelection(false);
+    });
+
+    MultiplayerEngine.onGameStart(function(data) {
+        startMultiplayerGame(data.gameType, false);
+    });
+
+    MultiplayerEngine.onError(function(error) {
+        document.getElementById('peerStatusText').textContent = 'Error: ' + error;
+        document.getElementById('peerStatusText').className = 'status-text error';
+        btn.disabled = false;
+        addChatMsg('Error', error);
+    });
+
+    MultiplayerEngine.onOpponentDisconnected(function(data) {
+        addChatMsg('System', 'Host disconnected. Waiting...');
+        document.getElementById('peerStatusText').textContent = 'Host disconnected. Waiting...';
+        document.getElementById('peerStatusText').className = 'status-text error';
+    });
+
+    MultiplayerEngine.onOpponentReconnected(function(data) {
+        addChatMsg('System', 'Host reconnected!');
+        document.getElementById('peerStatusText').textContent = 'Host reconnected!';
+        document.getElementById('peerStatusText').className = 'status-text success';
+    });
+
+    MultiplayerEngine.onOpponentLeft(function(data) {
+        alert(data.message);
+        disconnectMultiplayer();
+    });
+
+    MultiplayerEngine.onReconnected(function(data) {
+        addChatMsg('System', 'Reconnected!');
+        document.getElementById('peerStatusText').textContent = 'Reconnected!';
+        document.getElementById('peerStatusText').className = 'status-text success';
+
+        if (data.gameType && data.status === 'playing') {
+            restoreGameState(data);
+        }
+    });
+
+    MultiplayerEngine.onConnectionStatus(function(status) {
+        updateConnStatus(status);
+    });
+
+    isHost = false;
+    MultiplayerEngine.joinRoom(code, playerName);
+}
+
+// ==================== GAME SELECTION ====================
+function showGameSelection(host) {
+    isHost = host;
+    navigateTo('gameSelection');
+
+    var subtitle = document.getElementById('selectionSubtitle');
+    var status = document.getElementById('selectionStatus');
+    var c4 = document.getElementById('selectC4');
+    var ttt = document.getElementById('selectTTT');
+    var db = document.getElementById('selectDB');
+
+    if (host) {
+        subtitle.textContent = 'Select a game to start';
+        status.textContent = 'Click a game below to start!';
+        status.className = 'status-text success';
+
+        // Enable all cards for host
+        c4.classList.remove('disabled');
+        c4.style.pointerEvents = 'auto';
+        c4.style.opacity = '1';
+        ttt.classList.remove('disabled');
+        ttt.style.pointerEvents = 'auto';
+        ttt.style.opacity = '1';
+        db.classList.remove('disabled');
+        db.style.pointerEvents = 'auto';
+        db.style.opacity = '1';
+    } else {
+        subtitle.textContent = 'Waiting for host...';
+        status.textContent = 'The host is selecting a game...';
+        status.className = 'status-text info';
+
+        // Disable all cards for guest
+        c4.classList.add('disabled');
+        c4.style.pointerEvents = 'none';
+        c4.style.opacity = '0.4';
+        ttt.classList.add('disabled');
+        ttt.style.pointerEvents = 'none';
+        ttt.style.opacity = '0.4';
+        db.classList.add('disabled');
+        db.style.pointerEvents = 'none';
+        db.style.opacity = '0.4';
+    }
+}
+
+function selectGame(gameType) {
+    if (!isHost) return;
+
+    // Visual feedback
+    document.getElementById('selectionStatus').textContent = 'Starting ' + gameType + '...';
+    document.getElementById('selectionStatus').className = 'status-text success';
+
+    // Disable all cards
+    var cards = document.querySelectorAll('#gameSelectionGrid .game-card');
+    for (var i = 0; i < cards.length; i++) {
+        cards[i].classList.add('disabled');
+        cards[i].style.pointerEvents = 'none';
+    }
+
+    // Send selection to server
+    MultiplayerEngine.selectGame(gameType);
+}
+
+// ==================== START MULTIPLAYER GAME ====================
+function startMultiplayerGame(gameType, hostPlayer) {
+    currentGame = gameType;
+    isMultiplayerGame = true;
+    isHost = hostPlayer;
+
+    MultiplayerEngine.onMoveReceived(function(data) {
+        applyRemoteMove(data);
+    });
+
+    MultiplayerEngine.onGameEnd(function(data) {
+        handleGameEnd(data);
+    });
+
+    // Enable chat
+    document.getElementById('chatBox').classList.add('active');
+
+    if (gameType === 'connect4') {
+        navigateTo('connect4Game');
+        resetC4Peer(MultiplayerEngine.isHost());
+    } else if (gameType === 'tictactoe') {
+        navigateTo('tictactoeGame');
+        resetTTTPeer(MultiplayerEngine.isHost());
+    } else if (gameType === 'dotsboxes') {
+        navigateTo('dotsboxesGame');
+        resetDBPeer(MultiplayerEngine.isHost());
+    }
+}
+
+function applyRemoteMove(data) {
+    var move = data.move;
+    var player = data.player;
+
+    if (currentGame === 'connect4') {
+        applyPeerMoveC4(move.column);
+    } else if (currentGame === 'tictactoe') {
+        applyPeerMoveTTT(move.index, move.phase, move.selectedPiece);
+    } else if (currentGame === 'dotsboxes') {
+        applyPeerMoveDB(move.r, move.c, move.isHorizontal);
+    }
+}
+
+function handleGameEnd(data) {
+    if (data.draw) {
+        showWin('Draw!', 'Game ended in a draw');
+    } else {
+        var isWinner = (data.winner === 1 && isHost) || (data.winner === 2 && !isHost);
+        var winnerName = data.winner === 1 ? document.getElementById('c4name1').textContent : document.getElementById('c4name2').textContent;
+        showWin(winnerName + ' Wins!', 'Game over');
+
+        if (isWinner) {
+            recordWin(currentGame);
+        } else if (data.winner !== 0) {
+            recordLoss(currentGame);
+        }
+    }
+}
+
+function restoreGameState(data) {
+    // Restore game state after reconnection
+    if (data.gameType === 'connect4') {
+        // Server sends gameState.board, currentPlayer
+        // Need to sync local board with server state
+        if (data.gameState && data.gameState.board) {
+            c4board = data.gameState.board;
+            c4player = data.currentPlayer;
+            c4myTurn = (data.currentPlayer === 1 && isHost) || (data.currentPlayer === 2 && !isHost);
+            drawC4();
+            updateC4Turn();
+        }
+    } else if (data.gameType === 'tictactoe') {
+        if (data.gameState) {
+            tttboard = data.gameState.board;
+            ttthistory = data.gameState.history;
+            tttphase = data.gameState.phase;
+            tttplayer = data.currentPlayer === 1 ? 'X' : 'O';
+            tttmyTurn = (data.currentPlayer === 1 && isHost) || (data.currentPlayer === 2 && !isHost);
+            drawTTT();
+            updateTTTTurn();
+        }
+    } else if (data.gameType === 'dotsboxes') {
+        if (data.gameState) {
+            dbh = data.gameState.hLines;
+            dbv = data.gameState.vLines;
+            dbb = data.gameState.boxes;
+            dbplayer = data.currentPlayer;
+            dbmyTurn = (data.currentPlayer === 1 && isHost) || (data.currentPlayer === 2 && !isHost);
+            drawDB();
+            updateDBTurn();
+        }
+    }
+}
+
+// ==================== DISCONNECT & CLEANUP ====================
+function disconnectMultiplayer() {
+    MultiplayerEngine.disconnect();
+    isMultiplayerGame = false;
+    isHost = false;
+    currentGame = '';
+    peerPlayers = [];
+    selectedGame = null;
+
+    document.getElementById('chatBox').classList.remove('active');
+    document.getElementById('chatMessages').innerHTML = '';
+    document.getElementById('joinBtn').disabled = false;
+    document.getElementById('joinStatusText').textContent = '';
+    document.getElementById('joinStatusText').className = 'status-text';
+    document.getElementById('hostStatusText').textContent = 'Creating room...';
+    document.getElementById('hostStatusText').className = 'status-text info';
+    document.getElementById('peerStatusText').textContent = 'Joining room...';
+    document.getElementById('peerStatusText').className = 'status-text info';
+
+    updateConnStatus('offline');
+    navigateTo('mainMenu');
+}
+
+function copyRoomCode() {
+    var code = document.getElementById('hostRoomCode').textContent;
+    if (code === '---') return;
+
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(code).then(function() {
+            var btn = document.getElementById('copyCodeBtn');
+            btn.textContent = 'Copied!';
+            btn.classList.add('copied');
+            setTimeout(function() {
+                btn.textContent = 'Copy Code';
+                btn.classList.remove('copied');
+            }, 2000);
+        });
+    } else {
+        // Fallback
+        var ta = document.createElement('textarea');
+        ta.value = code;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+
+        var btn = document.getElementById('copyCodeBtn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+            btn.textContent = 'Copy Code';
+            btn.classList.remove('copied');
+        }, 2000);
+    }
+}
+
+// ==================== UI UPDATES ====================
+function updateHostPlayers() {
+    var list = document.getElementById('hostPlayers');
+    var html = '';
+    for (var i = 0; i < peerPlayers.length; i++) {
+        var p = peerPlayers[i];
+        html += '<div class="player-item"><div class="player-color" style="background:' + p.color + '"></div><div class="player-name">' + p.name + (p.number === 1 ? ' (Host)' : '') + '</div></div>';
+    }
+    list.innerHTML = html;
+}
+
+function updatePeerPlayers() {
+    var list = document.getElementById('peerPlayers');
+    var html = '';
+    for (var i = 0; i < peerPlayers.length; i++) {
+        var p = peerPlayers[i];
+        html += '<div class="player-item"><div class="player-color" style="background:' + p.color + '"></div><div class="player-name">' + p.name + (p.number === 1 ? ' (Host)' : '') + '</div></div>';
+    }
+    list.innerHTML = html;
+}
+
+// ==================== CHAT ====================
+function sendChat() {
+    var input = document.getElementById('chatInput');
+    var msg = input.value.trim();
+    if (msg) {
+        addChatMsg(playerName, msg);
+        // Note: Chat through WebSocket would need server support
+        // For now, local display only in multiplayer
+        input.value = '';
+    }
+}
+
+function addChatMsg(name, msg) {
+    var chat = document.getElementById('chatMessages');
+    var div = document.createElement('div');
+    div.className = 'chat-msg';
+    if (name === 'System') div.className += ' system';
+    if (name === 'Error') div.className += ' error';
+    div.innerHTML = '<strong>' + name + ':</strong> ' + msg;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+}
+
+// ==================== SEND MOVE ====================
+function sendMove(data) {
+    MultiplayerEngine.makeMove(data);
+}
+
+// ==================== LOCAL GAME START ====================
+function startLocalGame(game) {
+    currentGame = game;
+    isMultiplayerGame = false;
+    isHost = false;
+    document.getElementById('c4ModeSelector').style.display = 'flex';
+    if (game === 'connect4') {
+        navigateTo('connect4Game');
+        resetC4();
+    }
+    if (game === 'tictactoe') {
+        navigateTo('tictactoeGame');
+        resetTTT();
+    }
+    if (game === 'dotsboxes') {
+        navigateTo('dotsboxesGame');
+        resetDB();
+    }
+}
+
+// ==================== CONNECT 4 ====================
+var c4board = [];
+var c4player = 1;
+var c4mode = '1v1';
+var c4scores = [0, 0];
+var c4over = false;
+var c4winCells = [];
+var c4myTurn = false;
+
+function setC4Mode(mode) {
+    c4mode = mode;
+    document.getElementById('c4mode1').classList.toggle('active', mode === '1v1');
+    document.getElementById('c4mode2').classList.toggle('active', mode === '2v2');
+    resetC4();
+}
+
+function resetC4() {
+    c4board = [];
+    for (var r = 0; r < 6; r++) {
+        c4board[r] = [];
+        for (var c = 0; c < 7; c++) {
+            c4board[r][c] = 0;
+        }
+    }
+    c4player = 1;
+    c4over = false;
+    c4winCells = [];
+    document.getElementById('c4rematch').classList.remove('show');
+    updateC4Names();
+    drawC4();
+    updateC4Turn();
+}
+
+function resetC4Peer(hostStarts) {
+    c4board = [];
+    for (var r = 0; r < 6; r++) {
+        c4board[r] = [];
+        for (var c = 0; c < 7; c++) {
+            c4board[r][c] = 0;
+        }
+    }
+    c4player = 1;
+    c4over = false;
+    c4winCells = [];
+    c4myTurn = hostStarts === isHost;
+    document.getElementById('c4rematch').classList.remove('show');
+    document.getElementById('c4ModeSelector').style.display = 'none';
+    updateC4Names();
+    drawC4();
+    updateC4Turn();
+}
+
+function updateC4Names() {
+    var p1 = isMultiplayerGame ? (isHost ? playerName : peerPlayers[0].name) : 'Red';
+    var p2 = isMultiplayerGame ? (isHost ? peerPlayers[1].name : playerName) : 'Yellow';
+    document.getElementById('c4name1').textContent = p1;
+    document.getElementById('c4name2').textContent = p2;
+}
+
+function drawC4() {
+    var board = document.getElementById('c4board');
+    board.innerHTML = '';
+    for (var r = 0; r < 6; r++) {
+        for (var c = 0; c < 7; c++) {
+            var cell = document.createElement('div');
+            cell.className = 'connect4-cell';
+            if (c4board[r][c] > 0) {
+                cell.classList.add('p' + c4board[r][c]);
+            }
+            for (var w = 0; w < c4winCells.length; w++) {
+                if (c4winCells[w][0] === r && c4winCells[w][1] === c) {
+                    cell.classList.add('winner');
+                }
+            }
+            cell.onclick = (function(col) {
+                return function() { dropC4(col); };
+            })(c);
+            board.appendChild(cell);
+        }
+    }
+}
+
+function dropC4(col) {
+    if (c4over) return;
+    if (isMultiplayerGame && !c4myTurn) return;
+    for (var r = 5; r >= 0; r--) {
+        if (c4board[r][col] === 0) {
+            c4board[r][col] = c4player;
+            if (isMultiplayerGame) {
+                c4myTurn = false;
+                sendMove({column: col});
+            }
+            drawC4();
+            var winResult = checkC4Win(r, col);
+            if (winResult) {
+                c4over = true;
+                c4winCells = winResult;
+                drawC4();
+                var names = ['', document.getElementById('c4name1').textContent, document.getElementById('c4name2').textContent];
+                var winnerName = names[c4player];
+                showWin(winnerName + ' Wins!', '4 in a row!');
+                document.getElementById('c4rematch').classList.add('show');
+                if (isMultiplayerGame && !c4myTurn) recordWin('connect4');
+                return;
+            }
+            if (checkC4Draw()) {
+                c4over = true;
+                showWin('Draw!', 'Board is full');
+                document.getElementById('c4rematch').classList.add('show');
+                return;
+            }
+            nextC4Player();
+            updateC4Turn();
+            return;
+        }
+    }
+}
+
+function applyPeerMoveC4(col) {
+    c4myTurn = true;
+    for (var r = 5; r >= 0; r--) {
+        if (c4board[r][col] === 0) {
+            c4board[r][col] = c4player;
+            drawC4();
+            var winResult = checkC4Win(r, col);
+            if (winResult) {
+                c4over = true;
+                c4winCells = winResult;
+                drawC4();
+                var names = ['', document.getElementById('c4name1').textContent, document.getElementById('c4name2').textContent];
+                var winnerName = names[c4player];
+                showWin(winnerName + ' Wins!', '4 in a row!');
+                document.getElementById('c4rematch').classList.add('show');
+                recordLoss('connect4');
+                return;
+            }
+            if (checkC4Draw()) {
+                c4over = true;
+                showWin('Draw!', 'Board is full');
+                document.getElementById('c4rematch').classList.add('show');
+                return;
+            }
+            nextC4Player();
+            updateC4Turn();
+            return;
+        }
+    }
+}
+
+function nextC4Player() {
+    if (c4mode === '1v1') {
+        c4player = c4player === 1 ? 2 : 1;
+    } else {
+        c4player = c4player === 1 ? 2 : c4player === 2 ? 3 : c4player === 3 ? 4 : 1;
+    }
+}
+
+function updateC4Turn() {
+    var names = ['', document.getElementById('c4name1').textContent, document.getElementById('c4name2').textContent];
+    var colors = ['', '#ef4444', '#fbbf24', '#4ade80', '#f97316'];
+    var el = document.getElementById('c4turn');
+    var turnName = names[c4player];
+    if (isMultiplayerGame && !c4myTurn) turnName += " (Opponent's Turn)";
+    el.textContent = turnName + "'s Turn";
+    el.style.color = colors[c4player];
+}
+
+function checkC4Win(row, col) {
+    var p = c4board[row][col];
+    var dirs = [[0, 1], [1, 0], [1, 1], [1, -1]];
+    for (var i = 0; i < 4; i++) {
+        var dr = dirs[i][0];
+        var dc = dirs[i][1];
+        var cells = [[row, col]];
+        var j = 1;
+        while (j < 4) {
+            var rr = row + dr * j;
+            var cc = col + dc * j;
+            if (rr < 0 || rr > 5 || cc < 0 || cc > 6 || c4board[rr][cc] !== p) break;
+            cells.push([rr, cc]);
+            j++;
+        }
+        j = 1;
+        while (j < 4) {
+            var rr = row - dr * j;
+            var cc = col - dc * j;
+            if (rr < 0 || rr > 5 || cc < 0 || cc > 6 || c4board[rr][cc] !== p) break;
+            cells.push([rr, cc]);
+            j++;
+        }
+        if (cells.length >= 4) return cells;
+    }
+    return null;
+}
+
+function checkC4Draw() {
+    for (var c = 0; c < 7; c++) {
+        if (c4board[0][c] === 0) return false;
+    }
+    return true;
+}
+
+// ==================== TIC TAC TOE ====================
+var tttboard = [];
+var tttplayer = 'X';
+var ttthistory = {X: [], O: []};
+var tttphase = 'place';
+var tttselected = null;
+var tttscores = {X: 0, O: 0};
+var tttover = false;
+var tttwinCells = [];
+var tttmyTurn = false;
+
+function resetTTT() {
+    tttboard = [];
+    for (var i = 0; i < 9; i++) tttboard[i] = null;
+    tttplayer = 'X';
+    ttthistory = {X: [], O: []};
+    tttphase = 'place';
+    tttselected = null;
+    tttover = false;
+    tttwinCells = [];
+    document.getElementById('tttrematch').classList.remove('show');
+    document.getElementById('tttphase').textContent = 'Place';
+    updateTTTNames();
+    drawTTT();
+    updateTTTTurn();
+}
+
+function resetTTTPeer(hostStarts) {
+    tttboard = [];
+    for (var i = 0; i < 9; i++) tttboard[i] = null;
+    tttplayer = 'X';
+    ttthistory = {X: [], O: []};
+    tttphase = 'place';
+    tttselected = null;
+    tttover = false;
+    tttwinCells = [];
+    tttmyTurn = hostStarts === isHost;
+    document.getElementById('tttrematch').classList.remove('show');
+    document.getElementById('tttphase').textContent = 'Place';
+    updateTTTNames();
+    drawTTT();
+    updateTTTTurn();
+}
+
+function updateTTTNames() {
+    var xName = isMultiplayerGame ? (isHost ? playerName : peerPlayers[0].name) : 'X';
+    var oName = isMultiplayerGame ? (isHost ? peerPlayers[1].name : playerName) : 'O';
+    document.getElementById('tttname1').textContent = xName;
+    document.getElementById('tttname2').textContent = oName;
+}
+
+function drawTTT() {
+    var board = document.getElementById('tttboard');
+    board.innerHTML = '';
+    for (var i = 0; i < 9; i++) {
+        var cell = document.createElement('div');
+        cell.className = 'ttt-cell';
+        if (tttboard[i]) {
+            cell.classList.add(tttboard[i].toLowerCase());
+            cell.textContent = tttboard[i];
+        }
+        if (tttwinCells) {
+            for (var w = 0; w < tttwinCells.length; w++) {
+                if (tttwinCells[w] === i) cell.classList.add('winner');
+            }
+        }
+        if (tttselected === i) cell.classList.add('selected');
+        cell.onclick = (function(idx) {
+            return function() { clickTTT(idx); };
+        })(i);
+        board.appendChild(cell);
+    }
+}
+
+function clickTTT(index) {
+    if (tttover) return;
+    if (isMultiplayerGame && !tttmyTurn) return;
+    if (tttphase === 'place') {
+        if (!tttboard[index] && ttthistory[tttplayer].length < 3) {
+            tttboard[index] = tttplayer;
+            ttthistory[tttplayer].push(index);
+            if (isMultiplayerGame) {
+                tttmyTurn = false;
+                sendMove({index: index, phase: 'place', selectedPiece: null});
+            }
+            var winResult = checkTTTWin();
+            if (winResult) {
+                tttover = true;
+                tttwinCells = winResult;
+                drawTTT();
+                var names = {
+                    X: document.getElementById('tttname1').textContent,
+                    O: document.getElementById('tttname2').textContent
+                };
+                showWin(names[tttplayer] + ' Wins!', '3 in a row!');
+                document.getElementById('tttrematch').classList.add('show');
+                return;
+            }
+            if (ttthistory.X.length === 3 && ttthistory.O.length === 3) {
+                tttphase = 'move';
+                document.getElementById('tttphase').textContent = 'Move';
+            }
+            tttplayer = tttplayer === 'X' ? 'O' : 'X';
+            updateTTTTurn();
+            drawTTT();
+        }
+    } else {
+        if (tttselected === null) {
+            if (tttboard[index] === tttplayer) {
+                tttselected = index;
+                drawTTT();
+            }
+        } else {
+            if (!tttboard[index] && isAdjacent(tttselected, index)) {
+                var prevSelected = tttselected;
+                tttboard[index] = tttplayer;
+                tttboard[tttselected] = null;
+                var idx = ttthistory[tttplayer].indexOf(tttselected);
+                ttthistory[tttplayer][idx] = index;
+                tttselected = null;
+                if (isMultiplayerGame) {
+                    tttmyTurn = false;
+                    sendMove({index: index, phase: 'move', selectedPiece: prevSelected});
+                }
+                var winResult = checkTTTWin();
+                if (winResult) {
+                    tttover = true;
+                    tttwinCells = winResult;
+                    drawTTT();
+                    var names = {
+                        X: document.getElementById('tttname1').textContent,
+                        O: document.getElementById('tttname2').textContent
+                    };
+                    showWin(names[tttplayer] + ' Wins!', '3 in a row!');
+                    document.getElementById('tttrematch').classList.add('show');
+                    return;
+                }
+                tttplayer = tttplayer === 'X' ? 'O' : 'X';
+                updateTTTTurn();
+                drawTTT();
+            } else if (tttboard[index] === tttplayer) {
+                tttselected = index;
+                drawTTT();
+            } else {
+                tttselected = null;
+                drawTTT();
+            }
+        }
+    }
+}
+
+function applyPeerMoveTTT(index, phase, selected) {
+    tttmyTurn = true;
+    if (phase === 'place') {
+        tttboard[index] = tttplayer;
+        ttthistory[tttplayer].push(index);
+        var winResult = checkTTTWin();
+        if (winResult) {
+            tttover = true;
+            tttwinCells = winResult;
+            drawTTT();
+            var names = {
+                X: document.getElementById('tttname1').textContent,
+                O: document.getElementById('tttname2').textContent
+            };
+            showWin(names[tttplayer] + ' Wins!', '3 in a row!');
+            document.getElementById('tttrematch').classList.add('show');
+            recordLoss('tictactoe');
+            return;
+        }
+        if (ttthistory.X.length === 3 && ttthistory.O.length === 3) {
+            tttphase = 'move';
+            document.getElementById('tttphase').textContent = 'Move';
+        }
+        tttplayer = tttplayer === 'X' ? 'O' : 'X';
+        updateTTTTurn();
+        drawTTT();
+    } else {
+        tttboard[index] = tttplayer;
+        tttboard[selected] = null;
+        var idx = ttthistory[tttplayer].indexOf(selected);
+        ttthistory[tttplayer][idx] = index;
+        var winResult = checkTTTWin();
+        if (winResult) {
+            tttover = true;
+            tttwinCells = winResult;
+            drawTTT();
+            var names = {
+                X: document.getElementById('tttname1').textContent,
+                O: document.getElementById('tttname2').textContent
+            };
+            showWin(names[tttplayer] + ' Wins!', '3 in a row!');
+            document.getElementById('tttrematch').classList.add('show');
+            recordLoss('tictactoe');
+            return;
+        }
+        tttplayer = tttplayer === 'X' ? 'O' : 'X';
+        updateTTTTurn();
+        drawTTT();
+    }
+}
+
+function isAdjacent(from, to) {
+    var adj = {
+        0: [1, 3, 4], 1: [0, 2, 3, 4, 5], 2: [1, 4, 5],
+        3: [0, 1, 4, 6, 7], 4: [0, 1, 2, 3, 5, 6, 7, 8], 5: [1, 2, 4, 7, 8],
+        6: [3, 4, 7], 7: [3, 4, 5, 6, 8], 8: [4, 5, 7]
+    };
+    return adj[from] && adj[from].indexOf(to) !== -1;
+}
+
+function checkTTTWin() {
+    var wins = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+    var result = null;
+    for (var i = 0; i < wins.length; i++) {
+        var w = wins[i];
+        var a = w[0], b = w[1], c = w[2];
+        if (tttboard[a] && tttboard[a] === tttboard[b] && tttboard[b] === tttboard[c]) {
+            result = w;
+        }
+    }
+    return result;
+}
+
+function updateTTTTurn() {
+    var el = document.getElementById('tttturn');
+    var names = {
+        X: document.getElementById('tttname1').textContent,
+        O: document.getElementById('tttname2').textContent
+    };
+    var turnName = names[tttplayer];
+    if (isMultiplayerGame && !tttmyTurn) turnName += " (Opponent's Turn)";
+    var phase = tttphase === 'place' ? 'Place piece' : 'Move piece';
+    el.textContent = turnName + ' - ' + phase;
+    el.style.color = tttplayer === 'X' ? '#ef4444' : '#60a5fa';
+}
+
+// ==================== DOTS & BOXES ====================
+var dbh = [];
+var dbv = [];
+var dbb = [];
+var dbplayer = 1;
+var dbscores = [0, 0];
+var dbover = false;
+var DBSIZE = 5;
+var dbmyTurn = false;
+
+function resetDB() {
+    dbh = [];
+    dbv = [];
+    dbb = [];
+    for (var r = 0; r < DBSIZE; r++) {
+        dbh[r] = [];
+        for (var c = 0; c < DBSIZE - 1; c++) {
+            dbh[r][c] = 0;
+        }
+    }
+    for (var r = 0; r < DBSIZE - 1; r++) {
+        dbv[r] = [];
+        for (var c = 0; c < DBSIZE; c++) {
+            dbv[r][c] = 0;
+        }
+        dbb[r] = [];
+        for (var c = 0; c < DBSIZE - 1; c++) {
+            dbb[r][c] = 0;
+        }
+    }
+    dbplayer = 1;
+    dbscores = [0, 0];
+    dbover = false;
+    document.getElementById('dbrematch').classList.remove('show');
+    updateDBNames();
+    drawDB();
+    updateDBTurn();
+}
+
+function resetDBPeer(hostStarts) {
+    dbh = [];
+    dbv = [];
+    dbb = [];
+    for (var r = 0; r < DBSIZE; r++) {
+        dbh[r] = [];
+        for (var c = 0; c < DBSIZE - 1; c++) {
+            dbh[r][c] = 0;
+        }
+    }
+    for (var r = 0; r < DBSIZE - 1; r++) {
+        dbv[r] = [];
+        for (var c = 0; c < DBSIZE; c++) {
+            dbv[r][c] = 0;
+        }
+        dbb[r] = [];
+        for (var c = 0; c < DBSIZE - 1; c++) {
+            dbb[r][c] = 0;
+        }
+    }
+    dbplayer = 1;
+    dbscores = [0, 0];
+    dbover = false;
+    dbmyTurn = hostStarts === isHost;
+    document.getElementById('dbrematch').classList.remove('show');
+    updateDBNames();
+    drawDB();
+    updateDBTurn();
+}
+
+function updateDBNames() {
+    var p1 = isMultiplayerGame ? (isHost ? playerName : peerPlayers[0].name) : 'P1';
+    var p2 = isMultiplayerGame ? (isHost ? peerPlayers[1].name : playerName) : 'P2';
+    document.getElementById('dbname1').textContent = p1;
+    document.getElementById('dbname2').textContent = p2;
+}
+
+function drawDB() {
+    var container = document.getElementById('dbboard');
+    container.innerHTML = '';
+    for (var r = 0; r < DBSIZE; r++) {
+        var row1 = document.createElement('div');
+        row1.className = 'dots-row';
+        for (var c = 0; c < DBSIZE; c++) {
+            var dot = document.createElement('div');
+            dot.className = 'dot';
+            row1.appendChild(dot);
+            if (c < DBSIZE - 1) {
+                var line = document.createElement('div');
+                line.className = 'h-line';
+                if (dbh[r][c] === 1) line.classList.add('p1');
+                if (dbh[r][c] === 2) line.classList.add('p2');
+                if (!dbh[r][c]) {
+                    line.onclick = (function(rr, cc) {
+                        return function() { clickH(rr, cc); };
+                    })(r, c);
+                }
+                row1.appendChild(line);
+            }
+        }
+        container.appendChild(row1);
+        if (r < DBSIZE - 1) {
+            var row2 = document.createElement('div');
+            row2.className = 'dots-row';
+            for (var c = 0; c < DBSIZE; c++) {
+                var line = document.createElement('div');
+                line.className = 'v-line';
+                if (dbv[r][c] === 1) line.classList.add('p1');
+                if (dbv[r][c] === 2) line.classList.add('p2');
+                if (!dbv[r][c]) {
+                    line.onclick = (function(rr, cc) {
+                        return function() { clickV(rr, cc); };
+                    })(r, c);
+                }
+                row2.appendChild(line);
+                if (c < DBSIZE - 1) {
+                    var box = document.createElement('div');
+                    box.className = 'box';
+                    if (dbb[r][c] === 1) box.classList.add('p1');
+                    if (dbb[r][c] === 2) box.classList.add('p2');
+                    row2.appendChild(box);
+                }
+            }
+            container.appendChild(row2);
+        }
+    }
+    document.getElementById('dbs1').textContent = dbscores[0];
+    document.getElementById('dbs2').textContent = dbscores[1];
+}
+
+function clickH(r, c) {
+    if (dbover) return;
+    if (isMultiplayerGame && !dbmyTurn) return;
+    if (dbh[r][c]) return;
+    dbh[r][c] = dbplayer;
+    var got = checkBoxH(r, c);
+    if (!got) dbplayer = dbplayer === 1 ? 2 : 1;
+    if (isMultiplayerGame) {
+        dbmyTurn = got;
+        sendMove({r: r, c: c, isHorizontal: true});
+    }
+    drawDB();
+    updateDBTurn();
+    checkDBOver();
+}
+
+function clickV(r, c) {
+    if (dbover) return;
+    if (isMultiplayerGame && !dbmyTurn) return;
+    if (dbv[r][c]) return;
+    dbv[r][c] = dbplayer;
+    var got = checkBoxV(r, c);
+    if (!got) dbplayer = dbplayer === 1 ? 2 : 1;
+    if (isMultiplayerGame) {
+        dbmyTurn = got;
+        sendMove({r: r, c: c, isHorizontal: false});
+    }
+    drawDB();
+    updateDBTurn();
+    checkDBOver();
+}
+
+function applyPeerMoveDB(r, c, isH) {
+    dbmyTurn = true;
+    if (isH) {
+        dbh[r][c] = dbplayer;
+        var got = checkBoxH(r, c);
+        if (!got) dbplayer = dbplayer === 1 ? 2 : 1;
+    } else {
+        dbv[r][c] = dbplayer;
+        var got = checkBoxV(r, c);
+        if (!got) dbplayer = dbplayer === 1 ? 2 : 1;
+    }
+    drawDB();
+    updateDBTurn();
+    checkDBOver();
+}
+
+function checkBoxH(r, c) {
+    var got = false;
+    if (r > 0 && dbh[r-1][c] && dbv[r-1][c] && dbv[r-1][c+1] && !dbb[r-1][c]) {
+        dbb[r-1][c] = dbplayer;
+        dbscores[dbplayer - 1] = dbscores[dbplayer - 1] + 1;
+        got = true;
+    }
+    if (r < DBSIZE - 1 && dbh[r+1][c] && dbv[r][c] && dbv[r][c+1] && !dbb[r][c]) {
+        dbb[r][c] = dbplayer;
+        dbscores[dbplayer - 1] = dbscores[dbplayer - 1] + 1;
+        got = true;
+    }
+    return got;
+}
+
+function checkBoxV(r, c) {
+    var got = false;
+    if (c > 0 && dbv[r][c-1] && dbh[r][c-1] && dbh[r+1][c-1] && !dbb[r][c-1]) {
+        dbb[r][c-1] = dbplayer;
+        dbscores[dbplayer - 1] = dbscores[dbplayer - 1] + 1;
+        got = true;
+    }
+    if (c < DBSIZE - 1 && dbv[r][c+1] && dbh[r][c] && dbh[r+1][c] && !dbb[r][c]) {
+        dbb[r][c] = dbplayer;
+        dbscores[dbplayer - 1] = dbscores[dbplayer - 1] + 1;
+        got = true;
+    }
+    return got;
+}
+
+function updateDBTurn() {
+    var e = document.getElementById('dbturn');
+    var names = [document.getElementById('dbname1').textContent, document.getElementById('dbname2').textContent];
+    var colors = ['', '#ef4444', '#fbbf24'];
+    var turnName = names[dbplayer - 1];
+    if (isMultiplayerGame && !dbmyTurn) turnName += " (Opponent's Turn)";
+    e.textContent = turnName + "'s Turn";
+    e.style.color = colors[dbplayer];
+}
+
+function checkDBOver() {
+    var total = (DBSIZE - 1) * (DBSIZE - 1);
+    if (dbscores[0] + dbscores[1] >= total) {
+        dbover = true;
+        var names = [document.getElementById('dbname1').textContent, document.getElementById('dbname2').textContent];
+        if (dbscores[0] > dbscores[1]) {
+            showWin(names[0] + ' Wins!', dbscores[0] + ' - ' + dbscores[1]);
+            if (isMultiplayerGame && dbmyTurn) recordWin('dotsboxes');
+        } else if (dbscores[1] > dbscores[0]) {
+            showWin(names[1] + ' Wins!', dbscores[1] + ' - ' + dbscores[0]);
+            if (isMultiplayerGame && dbmyTurn) recordLoss('dotsboxes');
+        } else {
+            showWin('Draw!', dbscores[0] + ' - ' + dbscores[1]);
+        }
+        document.getElementById('dbrematch').classList.add('show');
+    }
+}
+
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', function() {
+    loadProfile();
+    navigateTo('mainMenu');
+    updateConnStatus('offline');
+});
+</script>
+</body>
+</html>

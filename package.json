@@ -1,0 +1,18 @@
+{
+  "name": "board-games-multiplayer",
+  "version": "1.0.0",
+  "description": "Multiplayer WebSocket server for Board Games using Cloudflare Workers Durable Objects",
+  "main": "server.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
